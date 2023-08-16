@@ -17,6 +17,7 @@ sqlalchemy = "^2.0.20"
 streamlit = "^1.25.0"
 matplotlib = "^3.7.2"
 mplsoccer = "^1.2.1"
+highlight-text = "^0.2"
 
 
 [build-system]

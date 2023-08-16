@@ -488,6 +488,17 @@ files = [
 ]
 
 [[package]]
+name = "highlight-text"
+version = "0.2"
+description = "matplotlib functions to plot text with color highlighted substrings"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "highlight_text-0.2-py3-none-any.whl", hash = "sha256:fb1333628f500a0ff2c25af757511eb39034c1d19571994821b2e0f76d040f75"},
+    {file = "highlight_text-0.2.tar.gz", hash = "sha256:062d8f648fd474157367e435e37ef5c68cc58b1c8d0b006baab2e7c1c60bdc37"},
+]
+
+[[package]]
 name = "httpcore"
 version = "0.17.3"
 description = "A minimal low-level HTTP client."
@@ -1979,4 +1990,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9.17"
-content-hash = "fd58aed51712f9b9d5000c32a216ead17e7cce8736c16f5b5ca90b579c32b1c9"
+content-hash = "e8b7eaaee4c188c3d4f47963d24476d67d53a3c5796be573d57d688d00dc878e"
