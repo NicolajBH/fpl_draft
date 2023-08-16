@@ -6,7 +6,7 @@ authors = ["NicolajBH <97743181+NicolajBH@users.noreply.github.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.9.17"
 lxml = "^4.9.3"
 selectolax = "^0.3.14"
 pandas = "^2.0.3"
