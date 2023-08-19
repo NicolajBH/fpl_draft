@@ -19,7 +19,7 @@ if load:
 
 st.header("Overall Standings")
 st.image("data_viz/figures/overall_table.png")
-# st.image("data_viz/figures/weekwise_table.png")
+st.image("data_viz/figures/weekwise_table.png")
 
 st.header("Monthly Standings")
 months_dropdown = st.selectbox("Pick a month", data_wrangling.list_of_months())

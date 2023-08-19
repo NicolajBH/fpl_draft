@@ -89,7 +89,7 @@ def week_wise():
     standings = data[data.played == True].groupby(by=['team_id','gw']).sum(numeric_only=True).reset_index()
     standings['overall_points'] = standings['stats.total_points'].groupby(standings['team_id']).transform('cumsum')
     standings['overall_rank'] = standings.groupby('gw')['overall_points'].rank(method='first', ascending=False).astype(int)
-    players = {15606:'Nicolaj',24788:'Jesus',42118:'Kris',154393:'Mattia',16133:'Ollie'}
+    players = {545927:'Nicolaj',546201:'Jesus',525936:'Kris',527284:'Mattia',524333:'Ollie'}
     standings.replace({'team_id':players}, inplace=True)
     draft_season_dict = {}
     for name in players.values():
@@ -292,4 +292,4 @@ def pizza_chart(player_name, stats, comparison, competition, gk=False):
 
 def main():
     overall()
-    # week_wise()
+    week_wise()
