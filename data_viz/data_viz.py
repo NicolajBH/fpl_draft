@@ -135,7 +135,7 @@ def week_wise():
     )
 
     # title and subtitle
-    TITLE = "Draft Premier League 2022/23 week-wise standings:"
+    TITLE = "Draft Premier League 2023/24 week-wise standings:"
     SUB_TITLE = "<Nicolaj>, <Jesus>, <Kris>, <Ollie>, <Mattia>"
 
     # add title
