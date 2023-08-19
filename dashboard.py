@@ -2,6 +2,7 @@ import streamlit as st
 import scrapers.data_wrangling as data_wrangling
 import data_viz.data_viz as data_viz
 import scrapers.scraper as scraper
+from sqlalchemy import create_engine
 
 st.set_page_config(
     page_title="Clueless",
@@ -17,6 +18,8 @@ if load:
    scraper.main()
    data_viz.main()
 
+last_update = scraper.last_updated()
+st.text("Last Updated: "+last_update+" UTC")
 st.header("Overall Standings")
 st.image("data_viz/figures/overall_table.png")
 st.image("data_viz/figures/weekwise_table.png")

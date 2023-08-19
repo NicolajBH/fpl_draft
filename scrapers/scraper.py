@@ -120,6 +120,13 @@ def sql_remove_duplicates(engine,id_column_name,table):
                     select max(Timestamp)\
                     from {table}\
                     group by {id_column_name}, gw)"))
+            
+def last_updated():
+    engine = create_engine('sqlite:///fpl-draft-db.db')
+    conn = engine.connect()
+    query = "SELECT MAX(TimeStamp) FROM player_picks"
+    last_update = pd.read_sql(text(query),conn).values[0][0]
+    return last_update
 
 def main():
     players = {545927:'Nicolaj',546201:'Jesus',525936:'Kris',527284:'Mattia',524333:'Ollie'}
