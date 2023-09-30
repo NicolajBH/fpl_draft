@@ -1,5 +1,5 @@
 import httpx
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine, text, inspect
 from datetime import datetime, timezone
 import pandas as pd
 import numpy as np
@@ -7,29 +7,15 @@ import time
 
 def gw_to_scrape(conn):
     '''
-    Gets the latest deadline from sql database
-    If it fails (e.g database doesn't exist) it makes a request to the fpl api to get the latest deadline
+    Checks fpl-draft-db.db for existing data and returns list of gameweeks to scrape.
     '''
-    try:
-        query = "SELECT MAX(id) FROM deadlines WHERE finished=1"
-        start_gw = pd.read_sql(text(query),conn).values[0][0]
-        now = datetime.now(timezone.utc)
-        if start_gw == 38:
-            end_gw = 38
-        else:
-            query2 = "SELECT deadline_time FROM deadlines WHERE id = (SELECT MIN(id) FROM deadlines WHERE finished = 0)"
-            next_deadline = pd.read_sql(text(query2),conn).values[0][0]
-            next_deadline = datetime.strptime(next_deadline, "%Y-%m-%dT%H:%M:%S%z")
-            if now > next_deadline:
-                end_gw = start_gw+1
-            else:
-                end_gw = start_gw
-    except:
-        url = "https://draft.premierleague.com/api/game"
-        data = get_data(url)
-        start_gw = 1
-        end_gw = data['current_event']
-    return start_gw, end_gw
+    query = "SELECT id \
+            FROM deadlines \
+            WHERE (isScraped = 0 AND Finished = 1)\
+            OR (isScraped = 0 AND Finished = 0 AND datetime('now') > datetime(deadline_time))"
+    gws = pd.read_sql(text(query),conn).values.tolist()
+    gws = [element for innerList in gws for element in innerList]
+    return gws
 
 def get_data(url):
     '''
@@ -45,14 +31,27 @@ def get_data(url):
         response = httpx.get(url, headers=headers)
     return response.json()
 
-def update_info(engine):
+def update_info(engine, conn):
     '''
     Updates info in deadline, fantasy player info and draft player info
     '''
     print("Updating records...")
     # deadline info
-    deadlines = get_data("https://draft.premierleague.com/api/bootstrap-static")
-    deadlines = pd.DataFrame(deadlines['events']['data'])
+    insp = inspect(engine)
+    check = insp.has_table("deadlines")
+    if check == True:
+        deadlines = pd.read_sql_table("deadlines", conn)
+        new_deadlines = get_data("https://draft.premierleague.com/api/bootstrap-static")
+        new_deadlines = pd.DataFrame(new_deadlines['events']['data'])
+        deadlines['deadline_time'] = new_deadlines['deadline_time']
+        deadlines['trades_time'] = new_deadlines['trades_time']
+        deadlines['waivers_time'] = new_deadlines['waivers_time']
+        deadlines['finished'] = new_deadlines['finished']
+    else:
+        deadlines = get_data("https://draft.premierleague.com/api/bootstrap-static")
+        deadlines = pd.DataFrame(deadlines['events']['data'])
+        deadlines['isScraped'] = False
+    
     deadlines['month'] = pd.DatetimeIndex(deadlines['deadline_time']).month_name()
     deadlines.to_sql('deadlines',engine,if_exists='replace', index=False)
     print("Deadline info updated")
@@ -69,11 +68,11 @@ def update_info(engine):
     draft_player_info.to_sql('draft_player_info',engine,if_exists='replace', index=False)
     print(str(len(draft_player_info)) + " records updated for draft player info")
 
-def update_player_stats(engine,start_gw,end_gw):
+def update_player_stats(engine,gws_to_scrape):
     '''
     Appends new gameweek data from the fpl api between the gameweeks specified (inclusive)
     '''
-    for gw in range(start_gw, end_gw+1):
+    for gw in gws_to_scrape:
         print(f"Updating player stats for gameweek {gw}")
         url = f"https://fantasy.premierleague.com/api/event/{gw}/live"
         data = get_data(url)
@@ -83,13 +82,13 @@ def update_player_stats(engine,start_gw,end_gw):
         player_stats_new_rows.to_sql('player_stats',engine,if_exists='append', index=False)
         print(str(len(player_stats_new_rows)) + ' rows added to player_stats')
 
-def update_player_picks(engine,start_gw,end_gw,players):
+def update_player_picks(engine,gws_to_scrape,players):
     '''
     Requests data for player picks for each team in players dict between start_gw and end_gw inclusive
     Adds additional columns for subs
     '''
     player_picks_df = pd.DataFrame()
-    for gw in range(start_gw, end_gw+1):
+    for gw in gws_to_scrape:
         print(f"Retrieving player picks for gameweek {gw}")
         for uid, name in players.items():
             url = f"https://draft.premierleague.com/api/entry/{uid}/event/{gw}"
@@ -133,12 +132,13 @@ def main():
     engine = create_engine('sqlite:///fpl-draft-db.db')
     conn = engine.connect()
 
-    start_gw, end_gw = gw_to_scrape(conn)
-    print(f"Scraping data from gameweek {start_gw} to {end_gw}...")
+    update_info(engine, conn)
 
-    update_info(engine)
-    update_player_stats(engine, start_gw, end_gw)
-    update_player_picks(engine, start_gw, end_gw, players)
+    gws_to_scrape = gw_to_scrape(conn)
+    print(f'Scraping data from {gws_to_scrape}')
+
+    update_player_stats(engine, gws_to_scrape)
+    update_player_picks(engine, gws_to_scrape, players)
 
     print("Cleaning SQL database...")
     sql_remove_duplicates(engine, "element", "player_picks")
