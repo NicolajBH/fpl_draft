@@ -1,5 +1,5 @@
 import httpx
-from sqlalchemy import create_engine, text, inspect
+from sqlalchemy import create_engine, text, inspect, update
 from datetime import datetime, timezone
 import pandas as pd
 import numpy as np
@@ -11,8 +11,8 @@ def gw_to_scrape(conn):
     '''
     query = "SELECT id \
             FROM deadlines \
-            WHERE (isScraped = 0 AND Finished = 1)\
-            OR (isScraped = 0 AND Finished = 0 AND datetime('now') > datetime(deadline_time))"
+            WHERE (isScraped = 0 AND finished = 1)\
+            OR (isScraped = 0 AND finished = 0 AND datetime('now') > datetime(deadline_time))"
     gws = pd.read_sql(text(query),conn).values.tolist()
     gws = [element for innerList in gws for element in innerList]
     return gws
@@ -119,7 +119,19 @@ def sql_remove_duplicates(engine,id_column_name,table):
                     select max(Timestamp)\
                     from {table}\
                     group by {id_column_name}, gw)"))
-            
+
+def sql_update_isScraped(engine):
+    '''
+    Used to update the isScraped column in deadlines table
+    Reduces number of api requests needed to send on subsequent runs
+    '''
+    with engine.connect() as conn:
+        with conn.begin():
+            conn.execute(text(
+                "UPDATE deadlines \
+                SET isScraped = 1 \
+                WHERE finished = 1 AND isScraped=0"))
+
 def last_updated():
     engine = create_engine('sqlite:///fpl-draft-db.db')
     conn = engine.connect()
@@ -143,6 +155,7 @@ def main():
     print("Cleaning SQL database...")
     sql_remove_duplicates(engine, "element", "player_picks")
     sql_remove_duplicates(engine, "id", "player_stats")
+    sql_update_isScraped(engine)
 
     print("Complete.")
 
