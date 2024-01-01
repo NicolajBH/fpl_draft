@@ -292,4 +292,4 @@ def pizza_chart(player_name, stats, comparison, competition, gk=False):
 
 def main():
     overall()
-    week_wise()
+    # week_wise()
