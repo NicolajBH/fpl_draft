@@ -51,11 +51,17 @@ def draft_standings(by_gw=False, by_month=False, gws=[], month=""):
     top_scorer = top_scoring_player(data)
     standings = standings.merge(top_scorer, on='team_id')
     standings = standings.sort_values(by='stats.total_points_x', ascending=False).reset_index()
+
+    benched = data[data.played == False].groupby(by=['team_id']).sum(numeric_only=True).reset_index()
+    benched = benched[['team_id','stats.total_points']]
+    benched.rename(columns = {'stats.total_points':'stats.points_benched'}, inplace=True)
+    standings = standings.merge(benched, on='team_id')
+
     cols = [
         'team_id','stats.total_points_x','web_name','stats.total_points_y','stats.goals_scored_x','stats.assists_x','stats.clean_sheets_x',
         'stats.goals_conceded_x','stats.own_goals_x','stats.penalties_saved_x','stats.penalties_missed_x','stats.yellow_cards_x',
         'stats.red_cards_x','stats.saves_x','stats.bonus_x','stats.bps_x','stats.expected_goals_x','stats.expected_assists_x',
-        'stats.expected_goal_involvements_x','stats.expected_goals_conceded_x','stats.in_dreamteam_x'
+        'stats.expected_goal_involvements_x','stats.expected_goals_conceded_x','stats.in_dreamteam_x', 'stats.points_benched'
     ]
     col_rename = [i.strip("_x").replace("stats.", "").replace("_"," ").title() for i in cols]
     standings = standings[cols]
