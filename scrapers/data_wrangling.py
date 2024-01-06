@@ -40,7 +40,7 @@ def top_scoring_player(data):
     best_players = best_players.merge(info[['draft_id','web_name']], left_on='element',right_on='draft_id')
     return best_players
 
-def draft_standings(by_gw=False, by_month=False, gws=[], month=""):
+def draft_standings(by_gw=False, by_month=False, gws=[], month="", stats_to_display=[]):
     data = merge_data()
     if by_gw:
         data = data[data.gw.between(gws[0],gws[1])]
@@ -83,9 +83,19 @@ def draft_standings(by_gw=False, by_month=False, gws=[], month=""):
         "Total Points Y":"Best Player Points",
         "Team Id":"Team"
     }, inplace=True)
+    if len(stats_to_display) == 0:
+        stats_to_display = list(standings.columns)
+    else:
+        stats_to_display.insert(0, "Team")
     standings.index += 1
-    return standings
+    return standings[stats_to_display]
 
+def list_of_stats():
+    df = draft_standings()
+    list_ = list(df.columns)
+    list_.remove("Team")
+    return list_
+    
 def list_of_months():
     data = merge_data()
     months = list(data.month.unique())
@@ -94,7 +104,6 @@ def list_of_months():
 
 def min_max_gw():
     data = merge_data()
-    min_gw = data.gw.min()
-    max_gw = data.gw.max()
+    min_gw, max_gw = data.gw.min(), data.gw.max()
     return min_gw, max_gw
 

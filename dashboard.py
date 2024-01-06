@@ -26,7 +26,8 @@ st.image("data_viz/figures/overall_table.png")
 
 st.header("Monthly Standings")
 months_dropdown = st.selectbox("Pick a month", data_wrangling.list_of_months())
-st.dataframe(data_wrangling.draft_standings(by_month=True, month=months_dropdown))
+stat_dropdown = st.multiselect("Pick stats",data_wrangling.list_of_stats())
+st.dataframe(data_wrangling.draft_standings(by_month=True, month=months_dropdown, stats_to_display=stat_dropdown))
 
 st.header("Gameweek Standings")
 min_gw, max_gw = data_wrangling.min_max_gw()
