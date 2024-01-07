@@ -26,7 +26,7 @@ st.image("data_viz/figures/overall_table.png")
 
 st.header("Monthly Standings")
 months_dropdown = st.selectbox("Pick a month", data_wrangling.list_of_months())
-stat_dropdown = st.multiselect("Pick stats",data_wrangling.list_of_stats())
+stat_dropdown = st.multiselect("Pick stats",data_wrangling.list_of_stats(), key="1")
 st.dataframe(data_wrangling.draft_standings(by_month=True, month=months_dropdown, stats_to_display=stat_dropdown))
 
 st.header("Gameweek Standings")
@@ -35,4 +35,5 @@ if max_gw != 1:
     gws = st.slider('Select gameweeks',int(min_gw),int(max_gw), (int(min_gw),int(max_gw)))
 if max_gw == 1:
     gws = [1,1]
-st.dataframe(data_wrangling.draft_standings(by_gw=True, gws=gws))
+stat_dropdown_gw = st.multiselect("Pick stats",data_wrangling.list_of_stats(), key="2")
+st.dataframe(data_wrangling.draft_standings(by_gw=True, gws=gws, stats_to_display=stat_dropdown_gw))
