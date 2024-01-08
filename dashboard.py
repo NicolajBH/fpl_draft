@@ -37,3 +37,6 @@ if max_gw == 1:
     gws = [1,1]
 stat_dropdown_gw = st.multiselect("Pick stats",data_wrangling.list_of_stats(), key="2")
 st.dataframe(data_wrangling.draft_standings(by_gw=True, gws=gws, stats_to_display=stat_dropdown_gw))
+
+st.header("Player Stats")
+st.dataframe(data_wrangling.player_stat_menu())
