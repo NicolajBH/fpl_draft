@@ -95,7 +95,7 @@ def player_stat_menu(by_gw=False, by_team=False, gws=[], stats_to_display=[]):
     if by_gw:
         data = data[data.gw.between(gws[0],gws[1])]
     cols = [
-            'team_id','stats.total_points','web_name','stats.goals_scored','stats.assists','stats.clean_sheets',
+            'team_id','web_name','stats.total_points','stats.goals_scored','stats.assists','stats.clean_sheets',
             'stats.goals_conceded','stats.own_goals','stats.penalties_saved','stats.penalties_missed','stats.yellow_cards',
             'stats.red_cards','stats.saves','stats.bonus','stats.bps','stats.expected_goals','stats.expected_assists',
             'stats.expected_goal_involvements','stats.expected_goals_conceded','stats.in_dreamteam',
@@ -122,16 +122,22 @@ def player_stat_menu(by_gw=False, by_team=False, gws=[], stats_to_display=[]):
         df.rename(columns = {
             "Total Points":"Points",
         }, inplace=True)
-    df = df.sort_values(by=['Points'], ascending=False).reset_index(drop=True)
-    if len(stats_to_display) == 0:
+    if (len(stats_to_display) == 0) and (not by_team):
         stats_to_display = list(df.columns)
+        column_sort = 1
+    elif (len(stats_to_display) == 0) and (by_team):
+        stats_to_display = list(df.columns)
+        column_sort = 2
     elif by_team:
         stats_to_display.insert(0, "Team")
         stats_to_display.insert(1, "Web Name")
+        column_sort = 2
     else:
         stats_to_display.insert(0,'Web Name')
+        column_sort = 1
+    df = df[stats_to_display].sort_values(by=df[stats_to_display].columns[column_sort], ascending=False).reset_index(drop=True)
     df.index += 1
-    return df[stats_to_display]
+    return df
 
 def list_of_stats():
     df = draft_standings()
