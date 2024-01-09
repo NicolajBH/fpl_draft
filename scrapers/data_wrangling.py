@@ -125,6 +125,8 @@ def player_stat_menu(by_gw=False, by_team=False, gws=[], stats_to_display=[]):
     df = df.sort_values(by=['Points'], ascending=False).reset_index(drop=True)
     if len(stats_to_display) == 0:
         stats_to_display = list(df.columns)
+    else:
+        stats_to_display.insert(0, "Team")
     df.index += 1
     return df[stats_to_display]
 
