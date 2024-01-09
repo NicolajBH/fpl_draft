@@ -127,6 +127,7 @@ def player_stat_menu(by_gw=False, by_team=False, gws=[], stats_to_display=[]):
         stats_to_display = list(df.columns)
     else:
         stats_to_display.insert(0, "Team")
+        stats_to_display.insert(1, "Web Name")
     df.index += 1
     return df[stats_to_display]
 
