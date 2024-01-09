@@ -32,11 +32,21 @@ st.dataframe(data_wrangling.draft_standings(by_month=True, month=months_dropdown
 st.header("Gameweek Standings")
 min_gw, max_gw = data_wrangling.min_max_gw()
 if max_gw != 1:
-    gws = st.slider('Select gameweeks',int(min_gw),int(max_gw), (int(min_gw),int(max_gw)))
+    gws = st.slider('Select gameweeks',int(min_gw),int(max_gw), (int(min_gw),int(max_gw)), key="2")
 if max_gw == 1:
     gws = [1,1]
-stat_dropdown_gw = st.multiselect("Pick stats",data_wrangling.list_of_stats(), key="2")
+stat_list = data_wrangling.list_of_stats()
+stat_list.remove('Team')
+stat_dropdown_gw = st.multiselect("Pick stats",stat_list, key="3")
 st.dataframe(data_wrangling.draft_standings(by_gw=True, gws=gws, stats_to_display=stat_dropdown_gw))
 
 st.header("Player Stats")
-st.dataframe(data_wrangling.player_stat_menu())
+if max_gw != 1:
+    gws_player_stats = st.slider('Select gameweeks',int(min_gw),int(max_gw), (int(min_gw),int(max_gw)), key="4")
+if max_gw == 1:
+    gws_player_stats = [1,1]
+to_remove = ['Best Player','Best Player Points','Points Benched','Points Subbed On','Number Of Subs']
+stat_list_players = [i for i in stat_list if i not in to_remove]
+player_stat_dropdown_gw = st.multiselect("Pick stats",stat_list_players, key="5")
+by_team_checkbox = st.checkbox('By Team')
+st.dataframe(data_wrangling.player_stat_menu(by_gw=True, by_team=by_team_checkbox, gws=gws_player_stats, stats_to_display=player_stat_dropdown_gw))

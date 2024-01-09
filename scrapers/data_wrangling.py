@@ -90,34 +90,47 @@ def draft_standings(by_gw=False, by_month=False, gws=[], month="", stats_to_disp
     standings.index += 1
     return standings[stats_to_display]
 
-def player_stat_menu():
+def player_stat_menu(by_gw=False, by_team=False, gws=[], stats_to_display=[]):
     data = merge_data()
-    df = data.groupby(by=['team_id','web_name']).sum(numeric_only=True).reset_index()
-
+    if by_gw:
+        data = data[data.gw.between(gws[0],gws[1])]
     cols = [
             'team_id','stats.total_points','web_name','stats.goals_scored','stats.assists','stats.clean_sheets',
             'stats.goals_conceded','stats.own_goals','stats.penalties_saved','stats.penalties_missed','stats.yellow_cards',
             'stats.red_cards','stats.saves','stats.bonus','stats.bps','stats.expected_goals','stats.expected_assists',
             'stats.expected_goal_involvements','stats.expected_goals_conceded','stats.in_dreamteam',
         ]
+
+    if by_team:
+        df = data.groupby(by=['team_id','web_name']).sum(numeric_only=True).reset_index()
+    else:
+        df = data.groupby(by=['web_name']).sum(numeric_only=True).reset_index()
+        cols.remove('team_id')
+
     col_rename = [i.replace("stats.", "").replace("_"," ").title() for i in cols]
     df = df[cols]
     df.columns = col_rename
-    players = {545927:'Nicolaj',546201:'Jesus',525936:'Kris',527284:'Mattia',524333:'Ollie'}
-    df.replace({'Team Id': players}, inplace=True)
-    df.rename(columns = {
-        "Total Points":"Points",
-        "Team Id":"Team"
-    }, inplace=True)
+
+    if by_team:
+        players = {545927:'Nicolaj',546201:'Jesus',525936:'Kris',527284:'Mattia',524333:'Ollie'}
+        df.replace({'Team Id': players}, inplace=True)
+        df.rename(columns = {
+            "Total Points":"Points",
+            "Team Id":"Team"
+        }, inplace=True)
+    else:
+        df.rename(columns = {
+            "Total Points":"Points",
+        }, inplace=True)
     df = df.sort_values(by=['Points'], ascending=False).reset_index(drop=True)
+    if len(stats_to_display) == 0:
+        stats_to_display = list(df.columns)
     df.index += 1
-    return df
+    return df[stats_to_display]
 
 def list_of_stats():
     df = draft_standings()
-    list_ = list(df.columns)
-    list_.remove("Team")
-    return list_
+    return list(df.columns)
     
 def list_of_months():
     data = merge_data()
