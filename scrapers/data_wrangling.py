@@ -55,15 +55,15 @@ def draft_standings(by_gw=False, by_month=False, gws=[], month="", stats_to_disp
     benched = data[data.played == False].groupby(by=['team_id']).sum(numeric_only=True).reset_index()
     benched = benched[['team_id','stats.total_points']]
     benched.rename(columns = {'stats.total_points':'stats.points_benched'}, inplace=True)
-    standings = standings.merge(benched, on='team_id')
+    standings = standings.merge(benched, on='team_id', how='left')
 
     points_subbed_on = data[data.sub_in == True].groupby(by=['team_id']).sum(numeric_only=True).reset_index()
     points_subbed_on = points_subbed_on[['team_id','stats.total_points']]
     points_subbed_on.rename(columns = {'stats.total_points':'stats.points_subbed_on'}, inplace=True)
-    standings = standings.merge(points_subbed_on, on='team_id')
+    standings = standings.merge(points_subbed_on, on='team_id', how='left')
 
     players_subbed_on = data[data.sub_in == True].groupby(by=['team_id'])['team_id'].value_counts().rename_axis('team_id').reset_index(name='stats.number_of_subs')
-    standings = standings.merge(players_subbed_on, on='team_id')
+    standings = standings.merge(players_subbed_on, on='team_id', how='left')
 
     cols = [
         'team_id','stats.total_points_x','web_name','stats.total_points_y','stats.goals_scored_x','stats.assists_x','stats.clean_sheets_x',
