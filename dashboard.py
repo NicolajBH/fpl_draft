@@ -5,7 +5,6 @@ from datetime import datetime, timezone
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from datetime import datetime
 
 # Import Data from FPL API into SQL db
 # Team ID and Player Names for players in the draft league
