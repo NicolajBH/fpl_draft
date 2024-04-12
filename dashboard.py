@@ -182,7 +182,7 @@ def top_scoring_player(data):
 def draft_standings(by_gw=False, by_month=False, gws=[], month="", stats_to_display=[]):
     if by_gw:
         data = frame[frame.gw.between(gws[0],gws[1])]
-    if by_month:
+    elif by_month:
         data = frame[frame.month == month]
     else:
         data = frame
@@ -396,7 +396,7 @@ st.dataframe(draft_standings(by_month=True, month=months_dropdown, stats_to_disp
 
 st.header("Gameweek Standings")
 if max_gw != 1:
-    gws = st.slider('Select gameweeks',int(min_gw),int(max_gw), (int(min_gw),int(max_gw)), key="2")
+    gws = list(st.slider('Select gameweeks',int(min_gw),int(max_gw), (int(min_gw),int(max_gw)), key="2"))
 if max_gw == 1:
     gws = [1,1]
 stat_dropdown_gw = st.multiselect("Pick stats",stat_list, key="3")
@@ -404,7 +404,7 @@ st.dataframe(draft_standings(by_gw=True, gws=gws, stats_to_display=stat_dropdown
 
 st.header("Player Stats")
 if max_gw != 1:
-    gws_player_stats = st.slider('Select gameweeks',int(min_gw),int(max_gw), (int(min_gw),int(max_gw)), key="4")
+    gws_player_stats = list(st.slider('Select gameweeks',int(min_gw),int(max_gw), (int(min_gw),int(max_gw)), key="4"))
 if max_gw == 1:
     gws_player_stats = [1,1]
 to_remove = ['Best Player','Best Player Points','Points Benched','Points Subbed On','Number Of Subs']
